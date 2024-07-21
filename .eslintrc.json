@@ -9,7 +9,6 @@
 	"plugins": ["react-prefer-function-component"],
 	"extends": [
 		"eslint:all",
-		"plugin:@typescript-eslint/all",
 		"plugin:import/recommended",
 		"plugin:import/typescript",
 		"plugin:react/all",
@@ -18,7 +17,6 @@
 		"airbnb-typescript",
 		"airbnb/hooks",
 		"plugin:react/jsx-runtime",
-		"plugin:unicorn/all",
 		"plugin:react-prefer-function-component/recommended",
 		"prettier"
 	],
@@ -144,18 +142,7 @@
 		],
 		"react/jsx-no-constructed-context-values": "error",
 		"react/jsx-no-script-url": "error",
-		"react/jsx-no-useless-fragment": "error",
-
-		"unicorn/filename-case": [
-			"error",
-			{
-				"cases": {
-					"camelCase": true,
-					"pascalCase": true
-				}
-			}
-		],
-		"unicorn/no-nested-ternary": ["error"]
+		"react/jsx-no-useless-fragment": "error"
 	},
 	"settings": {
 		"react": {
