@@ -45,18 +45,15 @@ function LoginScreen(): JSX.Element {
 	}
 
 	return (
-		<div className='flex min-h-screen items-center justify-center bg-gray-100'>
-			<div className='w-full max-w-md rounded-lg bg-white p-8 shadow-md'>
+		<div className='flex min-h-screen items-center justify-center'>
+			<div className=' max-w-md rounded-lg'>
 				<h2 className='mb-6 text-center text-2xl font-bold'>Connexion</h2>
 				<form
 					onSubmit={event => handleLogin(event, email, password)}
 					className='space-y-4'
 				>
 					<div>
-						<label
-							htmlFor='email'
-							className='block text-sm font-medium text-gray-700'
-						>
+						<label htmlFor='email' className='block text-sm font-medium'>
 							Email
 						</label>
 						<input
@@ -69,10 +66,7 @@ function LoginScreen(): JSX.Element {
 						/>
 					</div>
 					<div>
-						<label
-							htmlFor='password'
-							className='block text-sm font-medium text-gray-700'
-						>
+						<label htmlFor='password' className='block text-sm font-medium'>
 							Mot de passe
 						</label>
 						<input
@@ -103,7 +97,7 @@ function LoginScreen(): JSX.Element {
 					</button>
 				</div>
 				<div className='mt-6 text-center'>
-					<p className='text-sm text-gray-600'>
+					<p className='text-sm '>
 						Vous n'avez pas de compte ?{' '}
 						<a href='/signup' className='text-indigo-600 hover:underline'>
 							Inscrivez-vous

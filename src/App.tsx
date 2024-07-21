@@ -1,41 +1,78 @@
-import { onAuthStateChanged, User } from 'firebase/auth'
+import { onAuthStateChanged } from 'firebase/auth'
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import ErrorScreen from './components/ErrorScreen'
-import HomeScreen from './components/HomeScreen'
-import LoginScreen from './components/LoginScreen'
-import SignUpScreen from './components/SignUpScreen'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css' // Importer le CSS de Toastify
 import { auth } from './firebaseConfig'
+import ErrorScreen from './pages/ErrorScreen'
+import HomeScreen from './pages/HomeScreen'
+import Leaderboard from './pages/Leaderboard' // Importer le composant Leaderboard
+import LoginScreen from './pages/LoginScreen'
+import Navbar from './pages/Navbar'
+import ProfileScreen from './pages/ProfileScreen'
+import SignUpScreen from './pages/SignUpScreen'
+import TrackingScreen from './pages/TrackingScreen'
 
 function App(): JSX.Element {
-	const [user, setUser] = useState<User | undefined>(undefined)
+	const [user, setUser] = useState(auth.currentUser)
 	const [loading, setLoading] = useState(true)
+	const [darkMode, setDarkMode] = useState(true)
 
 	useEffect((): (() => void) => {
 		const unsubscribe = onAuthStateChanged(auth, currentUser => {
-			setUser(currentUser ?? undefined)
+			setUser(currentUser)
 			setLoading(false)
 		})
 		return () => unsubscribe()
 	}, [])
+
+	useEffect(() => {
+		if (darkMode) {
+			document.documentElement.classList.add('dark')
+		} else {
+			document.documentElement.classList.remove('dark')
+		}
+	}, [darkMode])
 
 	if (loading) {
 		return <div>Loading...</div>
 	}
 
 	return (
-		<BrowserRouter>
-			<Routes>
-				<Route
-					path='/'
-					element={user ? <HomeScreen /> : <Navigate to='/login' />}
-				/>
-				<Route path='/login' element={<LoginScreen />} />
-				<Route path='/signup' element={<SignUpScreen />} />
-				<Route path='/error' element={<ErrorScreen />} />
-				<Route path='*' element={<Navigate to='/error' />} />
-			</Routes>
-		</BrowserRouter>
+		<div className='min-h-screen bg-stone-100 pb-16 text-gray-900 dark:bg-stone-900 dark:text-gray-100'>
+			<button
+				onClick={() => setDarkMode(!darkMode)}
+				className='absolute right-4 top-4 rounded bg-gray-200 p-2 dark:bg-gray-800'
+			>
+				{darkMode ? 'Light Mode' : 'Dark Mode'}
+			</button>
+			<BrowserRouter>
+				<Routes>
+					<Route
+						path='/'
+						element={user ? <HomeScreen /> : <Navigate to='/login' />}
+					/>
+					<Route path='/login' element={<LoginScreen />} />
+					<Route path='/signup' element={<SignUpScreen />} />
+					<Route
+						path='/profile'
+						element={user ? <ProfileScreen /> : <Navigate to='/login' />}
+					/>
+					<Route
+						path='/leaderboard'
+						element={user ? <Leaderboard /> : <Navigate to='/login' />}
+					/>{' '}
+					<Route
+						path='/track'
+						element={user ? <TrackingScreen /> : <Navigate to='/login' />}
+					/>
+					<Route path='/error' element={<ErrorScreen />} />
+					<Route path='*' element={<Navigate to='/error' />} />
+				</Routes>
+				<Navbar />
+			</BrowserRouter>
+			<ToastContainer />
+		</div>
 	)
 }
 
