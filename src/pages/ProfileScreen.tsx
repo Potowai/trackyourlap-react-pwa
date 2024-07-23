@@ -35,7 +35,9 @@ function ProfileScreen() {
 		try {
 			const lapsCollection = collection(database, 'users', uid, 'laps')
 			const lapsSnapshot = await getDocs(lapsCollection)
-			const lapsData = lapsSnapshot.docs.map(doc => doc.data() as Lap)
+			const lapsData = lapsSnapshot.docs
+				.map(doc => doc.data() as Lap)
+				.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
 			setScores(lapsData)
 		} catch (error) {
 			console.error('Error fetching scores:', error)
