@@ -12,10 +12,10 @@ export default defineConfig({
 			devOptions: {
 				enabled: true
 			},
-			includeAssets: ['favicon.png', 'robots.txt', 'apple-touch-icon.png'],
+			includeAssets: ['icons/512_trackyourlap.png', 'robots.txt'],
 			manifest: {
 				name: 'Track Your Lap',
-				short_name: 'TrackLap',
+				short_name: 'TrackYourLap',
 				description: 'Track your laps and improve your performance.',
 				theme_color: '#ffffff',
 				background_color: '#ffffff',
@@ -29,7 +29,7 @@ export default defineConfig({
 						type: 'image/png'
 					},
 					{
-						src: 'icons/192_trackyourlap.png',
+						src: 'icons/512_trackyourlap.png',
 						sizes: '512x512',
 						type: 'image/png'
 					}
