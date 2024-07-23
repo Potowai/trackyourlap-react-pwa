@@ -9,25 +9,38 @@ export default defineConfig({
 		tsconfigPaths(),
 		VitePWA({
 			registerType: 'autoUpdate',
-			includeAssets: ['favicon.svg', 'robots.txt', 'apple-touch-icon.png'],
+			devOptions: {
+				enabled: true
+			},
+			includeAssets: ['favicon.png', 'robots.txt', 'apple-touch-icon.png'],
 			manifest: {
 				name: 'Track Your Lap',
 				short_name: 'TrackLap',
-				description: 'An app to track your laps',
+				description: 'Track your laps and improve your performance.',
 				theme_color: '#ffffff',
+				background_color: '#ffffff',
+				display: 'standalone',
+				scope: '/',
+				start_url: '/',
 				icons: [
 					{
-						src: 'pwa-192x192.png',
+						src: 'icons/192_trackyourlap.png',
 						sizes: '192x192',
 						type: 'image/png'
 					},
 					{
-						src: 'pwa-512x512.png',
+						src: 'icons/192_trackyourlap.png',
 						sizes: '512x512',
 						type: 'image/png'
 					}
 				]
 			}
 		})
-	]
+	],
+	server: {
+		headers: {
+			'Cross-Origin-Opener-Policy': 'same-origin',
+			'Cross-Origin-Embedder-Policy': 'require-corp'
+		}
+	}
 })
