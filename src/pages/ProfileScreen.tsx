@@ -4,6 +4,7 @@ import { ClipLoader } from 'react-spinners'
 import { auth, database } from '../firebaseConfig'
 
 interface Lap {
+	uid: string
 	position: {
 		_lat: number
 		_long: number
@@ -36,7 +37,7 @@ function ProfileScreen() {
 			const lapsCollection = collection(database, 'users', uid, 'laps')
 			const lapsSnapshot = await getDocs(lapsCollection)
 			const lapsData = lapsSnapshot.docs
-				.map(doc => doc.data() as Lap)
+				.map(doc => ({ uid, ...(doc.data() as Lap) }))
 				.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
 			setScores(lapsData)
 		} catch (error) {
@@ -71,6 +72,7 @@ function ProfileScreen() {
 										key={index}
 										className='rounded-md bg-stone-100 p-2 dark:bg-stone-700'
 									>
+										<p>UID: {score.uid}</p>
 										<p>Time: {score.time}</p>
 										<p>
 											Date:{' '}

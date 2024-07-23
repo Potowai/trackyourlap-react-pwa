@@ -4,13 +4,16 @@ import { ClipLoader } from 'react-spinners'
 import { database } from '../firebaseConfig'
 
 interface Lap {
-	position: string
+	uid: string
 	time: string
-	timestamp: string
+	timestamp: {
+		seconds: number
+		nanoseconds: number
+	}
 }
 
 interface UserScore {
-	name: string
+	uid: string
 	bestTime: string
 }
 
@@ -29,30 +32,24 @@ const Leaderboard: React.FC = () => {
 	useEffect(() => {
 		const fetchScores = async () => {
 			try {
-				const usersSnapshot = await getDocs(collection(database, 'users'))
-				const userScores: UserScore[] = []
+				const lapsSnapshot = await getDocs(collection(database, 'laps'))
+				const userScoresMap: { [uid: string]: string } = {}
 
-				for (const userDoc of usersSnapshot.docs) {
-					const userData = userDoc.data()
-					const lapsSnapshot = await getDocs(collection(userDoc.ref, 'laps'))
+				lapsSnapshot.forEach(lapDoc => {
+					const lapData = lapDoc.data() as Lap
+					if (
+						!userScoresMap[lapData.uid] ||
+						convertTimeToSeconds(lapData.time) <
+							convertTimeToSeconds(userScoresMap[lapData.uid])
+					) {
+						userScoresMap[lapData.uid] = lapData.time
+					}
+				})
 
-					let bestTime: string | null = null
-					lapsSnapshot.forEach(lapDoc => {
-						const lapData = lapDoc.data() as Lap
-						if (
-							!bestTime ||
-							convertTimeToSeconds(lapData.time) <
-								convertTimeToSeconds(bestTime)
-						) {
-							bestTime = lapData.time
-						}
-					})
-
-					userScores.push({
-						name: userData.name || 'Anonymous',
-						bestTime: bestTime || 'N/A'
-					})
-				}
+				const userScores: UserScore[] = Object.keys(userScoresMap).map(uid => ({
+					uid,
+					bestTime: userScoresMap[uid]
+				}))
 
 				// Trier les scores du plus rapide au plus lent
 				userScores.sort(
@@ -79,14 +76,14 @@ const Leaderboard: React.FC = () => {
 	}
 
 	return (
-		<div className='flex min-h-screen items-center justify-center bg-gray-100 dark:bg-stone-900 dark:text-gray-100 mx-6'>
+		<div className='mx-6 flex min-h-screen items-center justify-center bg-gray-100 dark:bg-stone-900 dark:text-gray-100'>
 			<div className='w-full max-w-4xl rounded-lg bg-white p-8 shadow-md dark:bg-stone-800'>
 				<h1 className='mb-6 text-center text-2xl font-bold'>Classement</h1>
 				<table className='min-w-full bg-white dark:bg-stone-800'>
 					<thead>
 						<tr>
 							<th className='border-b-2 border-gray-300 px-4 py-2 dark:border-stone-700'>
-								Nom
+								UID
 							</th>
 							<th className='border-b-2 border-gray-300 px-4 py-2 dark:border-stone-700'>
 								Meilleur Temps
@@ -99,7 +96,7 @@ const Leaderboard: React.FC = () => {
 								key={index}
 								className='border-b border-gray-200 dark:border-stone-700 '
 							>
-								<td className='px-4 py-2'>{user.name}</td>
+								<td className='px-4 py-2'>{user.uid}</td>
 								<td className='px-4 py-2'>{user.bestTime}</td>
 							</tr>
 						))}
