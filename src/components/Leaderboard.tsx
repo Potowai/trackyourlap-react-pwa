@@ -5,6 +5,7 @@ import { database } from '../firebaseConfig'
 
 interface Lap {
 	uid: string
+	name: string
 	time: string
 	timestamp: {
 		seconds: number
@@ -14,6 +15,7 @@ interface Lap {
 
 interface UserScore {
 	uid: string
+	name: string
 	bestTime: string
 }
 
@@ -23,6 +25,9 @@ const Leaderboard: React.FC = () => {
 
 	// Fonction pour convertir un temps au format HH:MM:SS en secondes
 	const convertTimeToSeconds = (time: string): number => {
+		if (!time) {
+			return Infinity
+		}
 		const parts = time.split(':')
 		const seconds =
 			parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2])
@@ -33,22 +38,30 @@ const Leaderboard: React.FC = () => {
 		const fetchScores = async () => {
 			try {
 				const lapsSnapshot = await getDocs(collection(database, 'laps'))
-				const userScoresMap: { [uid: string]: string } = {}
+				const userScoresMap: {
+					[uid: string]: { name: string; bestTime: string }
+				} = {}
 
 				lapsSnapshot.forEach(lapDoc => {
 					const lapData = lapDoc.data() as Lap
-					if (
-						!userScoresMap[lapData.uid] ||
-						convertTimeToSeconds(lapData.time) <
-							convertTimeToSeconds(userScoresMap[lapData.uid])
-					) {
-						userScoresMap[lapData.uid] = lapData.time
+					if (lapData.time && lapData.time.split(':').length === 3) {
+						if (
+							!userScoresMap[lapData.uid] ||
+							convertTimeToSeconds(lapData.time) <
+								convertTimeToSeconds(userScoresMap[lapData.uid].bestTime)
+						) {
+							userScoresMap[lapData.uid] = {
+								name: lapData.name,
+								bestTime: lapData.time
+							}
+						}
 					}
 				})
 
 				const userScores: UserScore[] = Object.keys(userScoresMap).map(uid => ({
 					uid,
-					bestTime: userScoresMap[uid]
+					name: userScoresMap[uid].name || 'Anonymous',
+					bestTime: userScoresMap[uid].bestTime
 				}))
 
 				// Trier les scores du plus rapide au plus lent
@@ -83,7 +96,7 @@ const Leaderboard: React.FC = () => {
 					<thead>
 						<tr>
 							<th className='border-b-2 border-gray-300 px-4 py-2 dark:border-stone-700'>
-								UID
+								Nom
 							</th>
 							<th className='border-b-2 border-gray-300 px-4 py-2 dark:border-stone-700'>
 								Meilleur Temps
@@ -96,7 +109,7 @@ const Leaderboard: React.FC = () => {
 								key={index}
 								className='border-b border-gray-200 dark:border-stone-700 '
 							>
-								<td className='px-4 py-2'>{user.uid}</td>
+								<td className='px-4 py-2'>{user.name}</td>
 								<td className='px-4 py-2'>{user.bestTime}</td>
 							</tr>
 						))}

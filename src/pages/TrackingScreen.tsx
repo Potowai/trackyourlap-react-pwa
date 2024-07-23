@@ -166,6 +166,7 @@ const TrackingScreen: React.FC = () => {
 					collection(database, 'laps'), // Changement ici pour la collection centrale 'laps'
 					{
 						uid: auth.currentUser.uid, // Ajout du champ UID
+						name: auth.currentUser.displayName || auth.currentUser.email,
 						position: `${location.latitude}, ${location.longitude}`,
 						time: elapsedTime,
 						timestamp: serverTimestamp()

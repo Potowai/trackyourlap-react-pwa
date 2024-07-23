@@ -1,4 +1,4 @@
-import { collection, getDocs } from 'firebase/firestore'
+import { collection, getDocs, query, where } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { ClipLoader } from 'react-spinners'
 import { auth, database } from '../firebaseConfig'
@@ -34,10 +34,11 @@ function ProfileScreen() {
 	const fetchScores = async (uid: string) => {
 		setLoading(true)
 		try {
-			const lapsCollection = collection(database, 'users', uid, 'laps')
-			const lapsSnapshot = await getDocs(lapsCollection)
+			const lapsCollection = collection(database, 'laps')
+			const q = query(lapsCollection, where('uid', '==', uid))
+			const lapsSnapshot = await getDocs(q)
 			const lapsData = lapsSnapshot.docs
-				.map(doc => ({ uid, ...(doc.data() as Lap) }))
+				.map(doc => doc.data() as Lap)
 				.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
 			setScores(lapsData)
 		} catch (error) {
@@ -72,7 +73,6 @@ function ProfileScreen() {
 										key={index}
 										className='rounded-md bg-stone-100 p-2 dark:bg-stone-700'
 									>
-										<p>UID: {score.uid}</p>
 										<p>Time: {score.time}</p>
 										<p>
 											Date:{' '}
