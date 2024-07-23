@@ -4,8 +4,9 @@ import {
 	signInWithPopup
 } from 'firebase/auth'
 import { useState, type ChangeEvent, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import GoogleButton from '../components/GoogleButton'
 import { auth } from '../firebaseConfig'
 
 function LoginScreen(): JSX.Element {
@@ -95,20 +96,14 @@ function LoginScreen(): JSX.Element {
 					</div>
 				</form>
 				<div className='mt-6'>
-					<button
-						type='button'
-						onClick={handleGoogleLogin}
-						className='flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
-					>
-						Connexion avec Google
-					</button>
+					<GoogleButton onClick={handleGoogleLogin} />
 				</div>
 				<div className='mt-6 text-center'>
 					<p className='text-sm '>
 						Vous n'avez pas de compte ?{' '}
-						<a href='/signup' className='text-indigo-600 hover:underline'>
+						<Link to={'/signup'} className='text-indigo-600 hover:underline'>
 							Inscrivez-vous
-						</a>
+						</Link>
 					</p>
 				</div>
 			</div>

@@ -1,4 +1,4 @@
-import { GoogleMap, MarkerF, useLoadScript } from '@react-google-maps/api';
+import { GoogleMap, Libraries, useLoadScript } from '@react-google-maps/api';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import _ from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -11,11 +11,10 @@ const mapContainerStyle = {
   height: '300px',
 };
 
-const libraries = ['places'];
+const libraries: Libraries = ['places'];
 
 const TrackingScreen: React.FC = () => {
   const [location, setLocation] = useState<GeolocationCoordinates | null>(null);
-  const [city, setCity] = useState<string | null>(null);
   const [tracking, setTracking] = useState(false);
   const [paused, setPaused] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -25,7 +24,8 @@ const TrackingScreen: React.FC = () => {
   const [speed, setSpeed] = useState<number>(0);
   const [previousLocation, setPreviousLocation] = useState<GeolocationCoordinates | null>(null);
   const [showingLocation, setShowingLocation] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const markerRef = useRef<google.maps.Marker | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { isLoaded, loadError } = useLoadScript({
@@ -39,7 +39,7 @@ const TrackingScreen: React.FC = () => {
       const destination = `${end.latitude},${end.longitude}`;
 
       try {
-        const response = await fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`);
+        const response = await fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`, { mode: 'no-cors' });
         const data = await response.json();
 
         if (data.rows && data.rows[0].elements[0].status === 'OK') {
@@ -55,7 +55,6 @@ const TrackingScreen: React.FC = () => {
         }
       } catch (error) {
         console.error('Error fetching distance from Google Maps API:', error);
-        setFetchError('Error fetching distance.');
       }
     }, 30000),
     [totalElapsedTime]
@@ -99,6 +98,20 @@ const TrackingScreen: React.FC = () => {
       return () => navigator.geolocation.clearWatch(watchId);
     }
   }, [tracking, previousLocation, debounceCalculateDistance]);
+
+  useEffect(() => {
+    if (location && mapRef.current) {
+      if (markerRef.current) {
+        markerRef.current.setPosition({ lat: location.latitude, lng: location.longitude });
+      } else {
+        markerRef.current = new google.maps.Marker({
+          position: { lat: location.latitude, lng: location.longitude },
+          map: mapRef.current,
+        });
+      }
+      mapRef.current.setCenter({ lat: location.latitude, lng: location.longitude });
+    }
+  }, [location]);
 
   const startTracking = () => {
     setStartTime(new Date());
@@ -161,7 +174,7 @@ const TrackingScreen: React.FC = () => {
 
   return (
     <div className='flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-stone-900 dark:text-gray-100'>
-      <div className='w-full max-w-lg  p-8 '>
+      <div className='w-full max-w-lg p-8'>
         <div className='text-center mb-6'>
           <p className='text-sm font-medium text-gray-500 dark:text-gray-400'>
             TIME
@@ -216,15 +229,20 @@ const TrackingScreen: React.FC = () => {
           Envoyer le temps
         </button>
         {showingLocation && location && (
-					<div className='mt-6'>
-          <GoogleMap
-            mapContainerStyle={mapContainerStyle}
-            center={{ lat: location.latitude, lng: location.longitude }}
-            zoom={15}
-          >
-            <MarkerF position={{ lat: location.latitude, lng: location.longitude }} />
-          </GoogleMap>
-					</div>
+          <div className='mt-6'>
+            <GoogleMap
+              mapContainerStyle={mapContainerStyle}
+              center={{ lat: location.latitude, lng: location.longitude }}
+              zoom={15}
+              onLoad={map => {
+                mapRef.current = map;
+                markerRef.current = new google.maps.Marker({
+                  map: map,
+                  position: { lat: location.latitude, lng: location.longitude },
+                });
+              }}
+            />
+          </div>
         )}
       </div>
     </div>

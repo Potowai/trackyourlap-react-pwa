@@ -1,6 +1,6 @@
 import { onAuthStateChanged } from 'firebase/auth';
 import { useEffect, useState } from 'react';
-import { FaMoon, FaSun } from 'react-icons/fa'; // Importer les icônes FaSun et FaMoon
+import { FaMoon, FaSun } from 'react-icons/fa';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ClipLoader } from 'react-spinners';
 import { ToastContainer } from 'react-toastify';
@@ -54,12 +54,13 @@ function App(): JSX.Element {
       </button>
       <BrowserRouter>
         <Routes>
-          <Route path='/' element={user ? <HomeScreen /> : <Navigate to='/login' />} />
+          <Route path='/' element={<Navigate to={'/home'} />} />
+          <Route path='/home' element={ <HomeScreen />} />
           <Route path='/login' element={<LoginScreen />} />
           <Route path='/signup' element={<SignUpScreen />} />
-          <Route path='/profile' element={user ? <ProfileScreen /> : <Navigate to='/login' />} />
-          <Route path='/leaderboard' element={user ? <Leaderboard /> : <Navigate to='/login' />} />
-          <Route path='/track' element={user ? <TrackingScreen /> : <Navigate to='/login' />} />
+          <Route path='/profile' element={user ? <ProfileScreen /> : <Navigate to='/' />} />
+          <Route path='/leaderboard' element={user ? <Leaderboard /> : <Navigate to='/' />} />
+          <Route path='/track' element={user ? <TrackingScreen /> : <Navigate to='/' />} />
           <Route path='/error' element={<ErrorScreen />} />
           <Route path='*' element={<Navigate to='/error' />} />
         </Routes>

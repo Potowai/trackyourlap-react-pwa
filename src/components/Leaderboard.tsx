@@ -93,11 +93,11 @@ const Leaderboard: React.FC = () => {
 							</th>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody className='text-center'>
 						{scores.map((user, index) => (
 							<tr
 								key={index}
-								className='border-b border-gray-200 dark:border-stone-700'
+								className='border-b border-gray-200 dark:border-stone-700 '
 							>
 								<td className='px-4 py-2'>{user.name}</td>
 								<td className='px-4 py-2'>{user.bestTime}</td>

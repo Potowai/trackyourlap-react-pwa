@@ -1,6 +1,6 @@
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { useState, type ChangeEvent, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { auth } from '../firebaseConfig'
 
 function SignUpScreen(): JSX.Element {
@@ -76,9 +76,9 @@ function SignUpScreen(): JSX.Element {
 				<div className='mt-6 text-center'>
 					<p className='text-sm '>
 						Vous avez déjà un compte ?{' '}
-						<a href='/login' className='text-indigo-600 hover:underline'>
+						<Link to={'/login'} className='text-indigo-600 hover:underline'>
 							Connexion
-						</a>
+						</Link>
 					</p>
 				</div>
 			</div>
