@@ -47,7 +47,7 @@ function ProfileScreen() {
 
 	return (
 		<div className='flex min-h-screen items-center justify-center bg-gray-100 dark:bg-stone-900 dark:text-gray-100'>
-			<div className='w-full max-w-md rounded-lg bg-white p-8 shadow-md dark:bg-stone-800'>
+			<div className='w-full max-w-md p-8'>
 				<h1 className='mb-6 text-center text-2xl font-bold'>Profil</h1>
 				{user ? (
 					<div className='text-center'>
@@ -69,12 +69,8 @@ function ProfileScreen() {
 								{scores.map((score, index) => (
 									<li
 										key={index}
-										className='rounded-md bg-stone-100 p-2 dark:bg-stone-900'
+										className='rounded-md bg-stone-100 p-2 dark:bg-stone-700'
 									>
-										<p>
-											Position:{' '}
-											{`Lat: ${score.position._lat}, Long: ${score.position._long}`}
-										</p>
 										<p>Time: {score.time}</p>
 										<p>
 											Date:{' '}

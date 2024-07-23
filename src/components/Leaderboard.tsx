@@ -79,7 +79,7 @@ const Leaderboard: React.FC = () => {
 	}
 
 	return (
-		<div className='flex min-h-screen items-center justify-center bg-gray-100 dark:bg-stone-900 dark:text-gray-100'>
+		<div className='flex min-h-screen items-center justify-center bg-gray-100 dark:bg-stone-900 dark:text-gray-100 mx-6'>
 			<div className='w-full max-w-4xl rounded-lg bg-white p-8 shadow-md dark:bg-stone-800'>
 				<h1 className='mb-6 text-center text-2xl font-bold'>Classement</h1>
 				<table className='min-w-full bg-white dark:bg-stone-800'>

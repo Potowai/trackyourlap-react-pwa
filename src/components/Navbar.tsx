@@ -7,7 +7,7 @@ import {
 	FaTrophy,
 	FaUser,
 	FaUserPlus
-} from 'react-icons/fa' // Import des icônes
+} from 'react-icons/fa'; // Import des icônes
 import { Link, useNavigate } from 'react-router-dom'
 import { auth } from '../firebaseConfig'
 
@@ -32,7 +32,7 @@ const Navbar: React.FC = () => {
 	}
 
 	const linkClass = (path: string) =>
-		location.pathname === path ? 'text-indigo-600' : 'hover:text-gray-300'
+		location.pathname === path ? 'text-green-500' : 'hover:text-gray-300'
 
 	return (
 		<nav className='fixed bottom-0 z-10  w-full bg-stone-900 p-4	text-white'>

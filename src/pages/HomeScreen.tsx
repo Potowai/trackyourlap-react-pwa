@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import ClipLoader from 'react-spinners/ClipLoader'
 import { auth } from '../firebaseConfig'
 
 function HomeScreen(): JSX.Element {
 	const [user, setUser] = useState(auth.currentUser)
 	const [loading, setLoading] = useState(true)
-	const navigate = useNavigate()
 
 	useEffect(() => {
 		const unsubscribe = auth.onAuthStateChanged(currentUser => {
@@ -42,9 +41,10 @@ function HomeScreen(): JSX.Element {
 						>
 							<button
 								type='button'
-								className='mb-2 w-full rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-2xl text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+								className='bg-green-500 text-white text-2xl font-bold px-4 py-2 border-2 border-gray-300 
+								rounded-full shadow-md hover:bg-green-600 active:bg-green-700 active:shadow-lg transform active:translate-y-1 h-32 w-32'
 							>
-								TRAQUE
+								TRACK
 							</button>
 						</Link>
 					</div>
