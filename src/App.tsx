@@ -1,17 +1,18 @@
-import { onAuthStateChanged } from 'firebase/auth'
-import { useEffect, useState } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css' // Importer le CSS de Toastify
-import { auth } from './firebaseConfig'
-import ErrorScreen from './pages/ErrorScreen'
-import HomeScreen from './pages/HomeScreen'
-import Leaderboard from './pages/Leaderboard' // Importer le composant Leaderboard
-import LoginScreen from './pages/LoginScreen'
-import Navbar from './pages/Navbar'
-import ProfileScreen from './pages/ProfileScreen'
-import SignUpScreen from './pages/SignUpScreen'
-import TrackingScreen from './pages/TrackingScreen'
+import { onAuthStateChanged } from 'firebase/auth';
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { ClipLoader } from 'react-spinners';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Importer le CSS de Toastify
+import Leaderboard from './components/Leaderboard'; // Importer le composant Leaderboard
+import Navbar from './components/Navbar';
+import { auth } from './firebaseConfig';
+import ErrorScreen from './pages/ErrorScreen';
+import HomeScreen from './pages/HomeScreen';
+import LoginScreen from './pages/LoginScreen';
+import ProfileScreen from './pages/ProfileScreen';
+import SignUpScreen from './pages/SignUpScreen';
+import TrackingScreen from './pages/TrackingScreen';
 
 function App(): JSX.Element {
 	const [user, setUser] = useState(auth.currentUser)
@@ -35,7 +36,9 @@ function App(): JSX.Element {
 	}, [darkMode])
 
 	if (loading) {
-		return <div>Loading...</div>
+		return <div className='flex min-h-screen items-center justify-center bg-gray-100 dark:bg-stone-900 dark:text-gray-100'>
+		<ClipLoader color='#4A90E2' loading={loading} size={50} />
+	</div>
 	}
 
 	return (
