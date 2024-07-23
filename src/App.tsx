@@ -44,7 +44,6 @@ function App(): JSX.Element {
       setDeferredPrompt(e);
       setInstallable(true);
       toast.info('Cliquez sur le bouton de téléchargement pour installer l\'application.', {
-        position: toast.POSITION.TOP_CENTER,
         autoClose: false,
       });
     };
