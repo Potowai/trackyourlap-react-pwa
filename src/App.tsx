@@ -36,22 +36,6 @@ function App(): JSX.Element {
     }
   }, [darkMode]);
 
-  useEffect(() => {
-    const askForDownload = () => {
-      const blob = new Blob(['Hello, this is the content of the file.'], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'sample.txt';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    };
-
-    askForDownload();
-  }, []);
-	
   if (loading) {
     return (
       <div className='flex min-h-screen items-center justify-center bg-gray-100 dark:bg-stone-900 dark:text-gray-100'>
