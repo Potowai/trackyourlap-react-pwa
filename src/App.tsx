@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { FaMoon, FaSun } from 'react-icons/fa';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ClipLoader } from 'react-spinners';
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Leaderboard from './components/Leaderboard';
 import Navbar from './components/Navbar';
@@ -89,12 +89,12 @@ function App(): JSX.Element {
       </button>
       <BrowserRouter>
         <Routes>
-          <Route path='/' element={user ? <HomeScreen /> : <Navigate to='/login' />} />
+          <Route path='/' element={<HomeScreen />} />
           <Route path='/login' element={<LoginScreen />} />
           <Route path='/signup' element={<SignUpScreen />} />
-          <Route path='/profile' element={user ? <ProfileScreen /> : <Navigate to='/login' />} />
-          <Route path='/leaderboard' element={user ? <Leaderboard /> : <Navigate to='/login' />} />
-          <Route path='/track' element={user ? <TrackingScreen /> : <Navigate to='/login' />} />
+          <Route path='/profile' element={user ? <ProfileScreen /> : <Navigate to='/' />} />
+          <Route path='/leaderboard' element={user ? <Leaderboard /> : <Navigate to='/' />} />
+          <Route path='/track' element={user ? <TrackingScreen /> : <Navigate to='/' />} />
           <Route path='/error' element={<ErrorScreen />} />
           <Route path='*' element={<Navigate to='/error' />} />
         </Routes>
