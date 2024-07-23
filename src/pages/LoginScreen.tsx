@@ -5,6 +5,7 @@ import {
 } from 'firebase/auth'
 import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import { auth } from '../firebaseConfig'
 
 function LoginScreen(): JSX.Element {
@@ -20,19 +21,25 @@ function LoginScreen(): JSX.Element {
 		event.preventDefault()
 		try {
 			await signInWithEmailAndPassword(auth, email, password)
-			navigate('/') // Redirige vers la page d'accueil après une connexion réussie
+			setTimeout(() => {
+				navigate('/')
+			}, 2000)
 		} catch (error) {
 			console.error('Erreur de connexion', error)
 		}
 	}
 
-	async function handleGoogleLogin(): Promise<void> {
+	const handleGoogleLogin = async () => {
 		const provider = new GoogleAuthProvider()
 		try {
 			await signInWithPopup(auth, provider)
-			navigate('/') // Redirige vers la page d'accueil après une connexion réussie
+			toast.success('Successfully signed in with Google')
+			setTimeout(() => {
+				navigate('/')
+			}, 2000)
 		} catch (error) {
-			console.error('Erreur de connexion avec Google', error)
+			console.error('Error during Google sign-in:', error)
+			toast.error('Error during Google sign-in')
 		}
 	}
 
