@@ -4,8 +4,8 @@ import { FaMoon, FaSun } from 'react-icons/fa';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ClipLoader } from 'react-spinners';
 import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Importer le CSS de Toastify
-import Leaderboard from './components/Leaderboard'; // Importer le composant Leaderboard
+import 'react-toastify/dist/ReactToastify.css';
+import Leaderboard from './components/Leaderboard';
 import Navbar from './components/Navbar';
 import { auth } from './firebaseConfig';
 import ErrorScreen from './pages/ErrorScreen';
@@ -19,6 +19,8 @@ function App(): JSX.Element {
   const [user, setUser] = useState(auth.currentUser);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [installable, setInstallable] = useState(false);
 
   useEffect((): (() => void) => {
     const unsubscribe = onAuthStateChanged(auth, currentUser => {
@@ -35,6 +37,39 @@ function App(): JSX.Element {
       document.documentElement.classList.remove('dark');
     }
   }, [darkMode]);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setInstallable(true);
+      toast.info('Cliquez sur le bouton de téléchargement pour installer l\'application.', {
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: false,
+      });
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        setDeferredPrompt(null);
+        setInstallable(false);
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -54,18 +89,27 @@ function App(): JSX.Element {
       </button>
       <BrowserRouter>
         <Routes>
-          <Route path='/' element={<Navigate to={'/home'} />} />
-          <Route path='/home' element={ <HomeScreen />} />
+          <Route path='/' element={user ? <HomeScreen /> : <Navigate to='/login' />} />
           <Route path='/login' element={<LoginScreen />} />
           <Route path='/signup' element={<SignUpScreen />} />
-          <Route path='/profile' element={user ? <ProfileScreen /> : <Navigate to='/' />} />
-          <Route path='/leaderboard' element={user ? <Leaderboard /> : <Navigate to='/' />} />
-          <Route path='/track' element={user ? <TrackingScreen /> : <Navigate to='/' />} />
+          <Route path='/profile' element={user ? <ProfileScreen /> : <Navigate to='/login' />} />
+          <Route path='/leaderboard' element={user ? <Leaderboard /> : <Navigate to='/login' />} />
+          <Route path='/track' element={user ? <TrackingScreen /> : <Navigate to='/login' />} />
           <Route path='/error' element={<ErrorScreen />} />
           <Route path='*' element={<Navigate to='/error' />} />
         </Routes>
         <Navbar />
       </BrowserRouter>
+      {installable && (
+        <div className='fixed bottom-4 right-4'>
+          <button
+            onClick={handleInstallClick}
+            className='flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 text-white shadow-md focus:outline-none'
+          >
+            Installer l'application
+          </button>
+        </div>
+      )}
       <ToastContainer />
     </div>
   );
