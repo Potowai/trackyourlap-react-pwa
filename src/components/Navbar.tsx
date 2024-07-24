@@ -35,7 +35,7 @@ const Navbar: React.FC = () => {
 		location.pathname === path ? 'text-green-500' : 'hover:text-gray-300'
 
 	return (
-		<nav className='fixed bottom-0 z-10 w-full  bg-stone-900 p-6 text-white'>
+		<nav className='fixed bottom-0 z-50 mt-4 w-full bg-stone-900 p-6 text-white'>
 			<div className='container mx-auto flex items-center justify-between'>
 				<div>
 					<Link to='/' className={`text-lg font-semibold ${linkClass('/')}`}>

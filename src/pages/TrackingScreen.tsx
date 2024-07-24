@@ -1,20 +1,39 @@
-import { GoogleMap, Libraries, useLoadScript } from '@react-google-maps/api'
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import {
+	addDoc,
+	collection,
+	doc,
+	getDoc,
+	serverTimestamp,
+	setDoc
+} from 'firebase/firestore'
+import L, { LatLngExpression } from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import _ from 'lodash'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { FaMapMarkerAlt, FaPause, FaPlay, FaStop } from 'react-icons/fa'
+import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import { toast } from 'react-toastify'
 import { auth, database } from '../firebaseConfig'
+
+// Correct the default icon issue in Leaflet
+delete L.Icon.Default.prototype._getIconUrl
+
+L.Icon.Default.mergeOptions({
+	iconRetinaUrl:
+		'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+	iconUrl:
+		'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+	shadowUrl:
+		'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png'
+})
 
 const mapContainerStyle = {
 	width: '100%',
 	height: '300px'
 }
 
-const libraries: Libraries = ['places']
-
 const TrackingScreen: React.FC = () => {
-	const [location, setLocation] = useState<GeolocationCoordinates | null>(null)
+	const [location, setLocation] = useState<number[] | null>(null)
 	const [tracking, setTracking] = useState(false)
 	const [paused, setPaused] = useState(false)
 	const [startTime, setStartTime] = useState<Date | null>(null)
@@ -22,50 +41,31 @@ const TrackingScreen: React.FC = () => {
 	const [totalElapsedTime, setTotalElapsedTime] = useState<number>(0)
 	const [totalDistance, setTotalDistance] = useState<number>(0)
 	const [speed, setSpeed] = useState<number>(0)
-	const [previousLocation, setPreviousLocation] =
-		useState<GeolocationCoordinates | null>(null)
+	const [previousLocation, setPreviousLocation] = useState<number[] | null>(
+		null
+	)
 	const [showingLocation, setShowingLocation] = useState(false)
-	const mapRef = useRef<google.maps.Map | null>(null)
-	const markerRef = useRef<google.maps.Marker | null>(null)
 	const timerRef = useRef<NodeJS.Timeout | null>(null)
 
-	const { isLoaded, loadError } = useLoadScript({
-		googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
-		libraries
-	})
-
 	const debounceCalculateDistance = useCallback(
-		_.debounce(
-			async (start: GeolocationCoordinates, end: GeolocationCoordinates) => {
-				const origin = `${start.latitude},${start.longitude}`
-				const destination = `${end.latitude},${end.longitude}`
-
-				try {
-					const response = await fetch(
-						`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`,
-						{ mode: 'no-cors' }
-					)
-					const data = await response.json()
-
-					if (data.rows && data.rows[0].elements[0].status === 'OK') {
-						const distanceInMeters = data.rows[0].elements[0].distance.value
-						const distanceInKilometers = distanceInMeters / 1000
-						setTotalDistance(
-							prevDistance => prevDistance + distanceInKilometers
-						)
-						const timeElapsedInSeconds = totalElapsedTime / 1000
-						if (timeElapsedInSeconds > 0) {
-							setSpeed((distanceInKilometers / timeElapsedInSeconds) * 3.6) // Convert to km/h
-						}
-					} else {
-						console.error('Error fetching distance from Google Maps API:', data)
-					}
-				} catch (error) {
-					console.error('Error fetching distance from Google Maps API:', error)
-				}
-			},
-			30000
-		),
+		_.debounce((start: number[], end: number[]) => {
+			const toRadians = (degrees: number) => degrees * (Math.PI / 180)
+			const R = 6371e3 // Radius of Earth in meters
+			const φ1 = toRadians(start[0])
+			const φ2 = toRadians(end[0])
+			const Δφ = toRadians(end[0] - start[0])
+			const Δλ = toRadians(end[1] - start[1])
+			const a =
+				Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+				Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2)
+			const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+			const distance = R * c
+			setTotalDistance(prevDistance => prevDistance + distance / 1000)
+			const timeElapsedInSeconds = totalElapsedTime / 1000
+			if (timeElapsedInSeconds > 0) {
+				setSpeed((distance / timeElapsedInSeconds) * 3.6) // Convert to km/h
+			}
+		}, 30000),
 		[totalElapsedTime]
 	)
 
@@ -95,11 +95,15 @@ const TrackingScreen: React.FC = () => {
 		if (tracking) {
 			const watchId = navigator.geolocation.watchPosition(
 				position => {
-					setLocation(position.coords)
+					const newLocation: number[] = [
+						position.coords.latitude,
+						position.coords.longitude
+					]
+					setLocation(newLocation)
 					if (previousLocation) {
-						debounceCalculateDistance(previousLocation, position.coords)
+						debounceCalculateDistance(previousLocation, newLocation)
 					}
-					setPreviousLocation(position.coords)
+					setPreviousLocation(newLocation)
 				},
 				error => console.error(error),
 				{ enableHighAccuracy: true }
@@ -107,26 +111,6 @@ const TrackingScreen: React.FC = () => {
 			return () => navigator.geolocation.clearWatch(watchId)
 		}
 	}, [tracking, previousLocation, debounceCalculateDistance])
-
-	useEffect(() => {
-		if (location && mapRef.current) {
-			if (markerRef.current) {
-				markerRef.current.setPosition({
-					lat: location.latitude,
-					lng: location.longitude
-				})
-			} else {
-				markerRef.current = new google.maps.Marker({
-					position: { lat: location.latitude, lng: location.longitude },
-					map: mapRef.current
-				})
-			}
-			mapRef.current.setCenter({
-				lat: location.latitude,
-				lng: location.longitude
-			})
-		}
-	}, [location])
 
 	const startTracking = () => {
 		setStartTime(new Date())
@@ -162,16 +146,29 @@ const TrackingScreen: React.FC = () => {
 	const sendTime = async () => {
 		if (auth.currentUser && location) {
 			try {
+				const lapData = {
+					position: `${location[0]}, ${location[1]}`,
+					time: elapsedTime,
+					timestamp: serverTimestamp(),
+					uid: auth.currentUser.uid,
+					name: auth.currentUser.displayName || auth.currentUser.email
+				}
+
 				await addDoc(
-					collection(database, 'laps'), // Changement ici pour la collection centrale 'laps'
-					{
-						uid: auth.currentUser.uid, // Ajout du champ UID
-						name: auth.currentUser.displayName || auth.currentUser.email,
-						position: `${location.latitude}, ${location.longitude}`,
-						time: elapsedTime,
-						timestamp: serverTimestamp()
-					}
+					collection(database, `users/${auth.currentUser.uid}/laps`),
+					lapData
 				)
+				// Check if this is the best time and update the bestTimes collection
+				const bestTimeDocRef = doc(database, 'bestTimes', auth.currentUser.uid)
+				const bestTimeDoc = await getDoc(bestTimeDocRef)
+
+				if (
+					!bestTimeDoc.exists() ||
+					convertTimeToSeconds(elapsedTime) <
+						convertTimeToSeconds(bestTimeDoc.data()?.time)
+				) {
+					await setDoc(bestTimeDocRef, lapData)
+				}
 				toast.success('Time sent successfully!')
 			} catch (error) {
 				console.error('Error sending time:', error)
@@ -186,8 +183,12 @@ const TrackingScreen: React.FC = () => {
 		setShowingLocation(true)
 	}
 
-	if (loadError) return <div>Error loading maps</div>
-	if (!isLoaded) return <div>Loading maps...</div>
+	const convertTimeToSeconds = (time: string): number => {
+		const parts = time.split(':')
+		const seconds =
+			parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2])
+		return seconds
+	}
 
 	return (
 		<div className='flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-stone-900 dark:text-gray-100'>
@@ -246,19 +247,20 @@ const TrackingScreen: React.FC = () => {
 					Envoyer le temps
 				</button>
 				{showingLocation && location && (
-					<div className='mt-6'>
-						<GoogleMap
-							mapContainerStyle={mapContainerStyle}
-							center={{ lat: location.latitude, lng: location.longitude }}
+					<div className='mt-6 h-80'>
+						<MapContainer
+							center={location as LatLngExpression}
 							zoom={15}
-							onLoad={map => {
-								mapRef.current = map
-								markerRef.current = new google.maps.Marker({
-									map: map,
-									position: { lat: location.latitude, lng: location.longitude }
-								})
-							}}
-						/>
+							style={{ minHeight: '150px', height: '100%' }}
+						>
+							<TileLayer
+								url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+								attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+							/>
+							<Marker position={location as LatLngExpression}>
+								<Popup>Vous êtes ici</Popup>
+							</Marker>
+						</MapContainer>
 					</div>
 				)}
 			</div>

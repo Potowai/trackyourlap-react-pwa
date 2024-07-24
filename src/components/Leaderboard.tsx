@@ -3,24 +3,14 @@ import React, { useEffect, useState } from 'react'
 import { ClipLoader } from 'react-spinners'
 import { database } from '../firebaseConfig'
 
-interface Lap {
+interface BestTime {
 	uid: string
 	name: string
 	time: string
-	timestamp: {
-		seconds: number
-		nanoseconds: number
-	}
-}
-
-interface UserScore {
-	uid: string
-	name: string
-	bestTime: string
 }
 
 const Leaderboard: React.FC = () => {
-	const [scores, setScores] = useState<UserScore[]>([])
+	const [scores, setScores] = useState<BestTime[]>([])
 	const [loading, setLoading] = useState(true)
 
 	// Fonction pour convertir un temps au format HH:MM:SS en secondes
@@ -37,37 +27,19 @@ const Leaderboard: React.FC = () => {
 	useEffect(() => {
 		const fetchScores = async () => {
 			try {
-				const lapsSnapshot = await getDocs(collection(database, 'laps'))
-				const userScoresMap: {
-					[uid: string]: { name: string; bestTime: string }
-				} = {}
+				const bestTimesSnapshot = await getDocs(
+					collection(database, 'bestTimes')
+				)
+				const userScores: BestTime[] = []
 
-				lapsSnapshot.forEach(lapDoc => {
-					const lapData = lapDoc.data() as Lap
-					if (lapData.time && lapData.time.split(':').length === 3) {
-						if (
-							!userScoresMap[lapData.uid] ||
-							convertTimeToSeconds(lapData.time) <
-								convertTimeToSeconds(userScoresMap[lapData.uid].bestTime)
-						) {
-							userScoresMap[lapData.uid] = {
-								name: lapData.name,
-								bestTime: lapData.time
-							}
-						}
-					}
+				bestTimesSnapshot.forEach(doc => {
+					const data = doc.data() as BestTime
+					userScores.push(data)
 				})
-
-				const userScores: UserScore[] = Object.keys(userScoresMap).map(uid => ({
-					uid,
-					name: userScoresMap[uid].name || 'Anonymous',
-					bestTime: userScoresMap[uid].bestTime
-				}))
 
 				// Trier les scores du plus rapide au plus lent
 				userScores.sort(
-					(a, b) =>
-						convertTimeToSeconds(a.bestTime) - convertTimeToSeconds(b.bestTime)
+					(a, b) => convertTimeToSeconds(a.time) - convertTimeToSeconds(b.time)
 				)
 
 				setScores(userScores)
@@ -110,7 +82,7 @@ const Leaderboard: React.FC = () => {
 								className='border-b border-gray-200 dark:border-stone-700 '
 							>
 								<td className='px-4 py-2'>{user.name}</td>
-								<td className='px-4 py-2'>{user.bestTime}</td>
+								<td className='px-4 py-2'>{user.time}</td>
 							</tr>
 						))}
 					</tbody>
