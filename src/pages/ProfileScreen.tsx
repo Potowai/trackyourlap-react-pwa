@@ -1,4 +1,4 @@
-import { collection, getDocs, query, where } from 'firebase/firestore'
+import { collection, getDocs } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { ClipLoader } from 'react-spinners'
 import { auth, database } from '../firebaseConfig'
@@ -34,17 +34,17 @@ function ProfileScreen() {
 	const fetchScores = async (uid: string) => {
 		setLoading(true)
 		try {
-			const lapsCollection = collection(database, 'laps')
-			const q = query(lapsCollection, where('uid', '==', uid))
-			const lapsSnapshot = await getDocs(q)
+			const lapsCollection = collection(database, `users/${uid}/laps`)
+			const lapsSnapshot = await getDocs(lapsCollection)
 			const lapsData = lapsSnapshot.docs
 				.map(doc => doc.data() as Lap)
 				.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
 			setScores(lapsData)
 		} catch (error) {
 			console.error('Error fetching scores:', error)
+		} finally {
+			setLoading(false)
 		}
-		setLoading(false)
 	}
 
 	return (
