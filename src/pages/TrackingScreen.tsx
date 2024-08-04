@@ -21,7 +21,7 @@ const icon = L.icon({
 })
 
 const portes = [
-	{ name: 'Chez Alexis :)', coordinates: [] },
+	{ name: 'Chez Alexis :)', coordinates: [47.2645632, -1.523712] },
 	{ name: "Porte de l'Estuaire", coordinates: [47.2, -1.6125] },
 	{ name: 'Porte de Saint-Herblain', coordinates: [47.2167, -1.6208] },
 	{ name: "Porte d'Atlantis", coordinates: [47.2333, -1.6083] },
