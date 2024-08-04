@@ -1,4 +1,5 @@
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import _ from 'lodash'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -12,6 +13,12 @@ import {
 } from 'react-leaflet'
 import { toast } from 'react-toastify'
 import { auth, database } from '../firebaseConfig'
+
+const icon = L.icon({
+	iconUrl:
+		'https://firebasestorage.googleapis.com/v0/b/trackyourlap-999c1.appspot.com/o/location-pin.png?alt=media&token=4c30be9f-b8ec-4c0f-a617-fb7637ee8b0b',
+	iconSize: [30, 30]
+})
 
 const portes = [
 	{ name: 'Porte 1', coords: [47.218371, -1.553621] },
@@ -265,7 +272,9 @@ const TrackingScreen: React.FC = () => {
 							url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 							attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
 						/>
-						{location && <Marker position={location as [number, number]} />}
+						{location && (
+							<Marker icon={icon} position={location as [number, number]} />
+						)}
 						<Polyline
 							positions={trackPath as [number, number][]}
 							color='blue'
