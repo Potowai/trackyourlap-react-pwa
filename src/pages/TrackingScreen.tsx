@@ -17,7 +17,7 @@ import { auth, database } from '../firebaseConfig'
 const icon = L.icon({
 	iconUrl:
 		'https://firebasestorage.googleapis.com/v0/b/trackyourlap-999c1.appspot.com/o/location-pin.png?alt=media&token=4c30be9f-b8ec-4c0f-a617-fb7637ee8b0b',
-	iconSize: [30, 30]
+	iconSize: [45, 45]
 })
 
 const portes = [
