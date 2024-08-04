@@ -110,6 +110,7 @@ function App(): JSX.Element {
 						element={user ? <TrackingScreen /> : <Navigate to='/' />}
 					/>
 					<Route path='/marker-icon-2x.png' />
+					<Route path='/marker-icon.png' />
 					<Route path='/error' element={<ErrorScreen />} />
 					<Route path='*' element={<Navigate to='/error' />} />
 				</Routes>
