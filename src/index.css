@@ -140,3 +140,7 @@
 	background-color: #303030;
 	opacity: 8%;
 }
+
+.leaflet-bottom.leaflet-right {
+	opacity: 0;
+}

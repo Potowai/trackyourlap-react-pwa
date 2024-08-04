@@ -21,9 +21,30 @@ const icon = L.icon({
 })
 
 const portes = [
-	{ name: 'Porte 1', coords: [47.218371, -1.553621] },
-	{ name: 'Porte 2', coords: [47.220548, -1.552999] }
-	// Ajoutez les autres portes ici
+	{ name: 'Chez Alexis :)', coordinates: [] },
+	{ name: "Porte de l'Estuaire", coordinates: [47.2, -1.6125] },
+	{ name: 'Porte de Saint-Herblain', coordinates: [47.2167, -1.6208] },
+	{ name: "Porte d'Atlantis", coordinates: [47.2333, -1.6083] },
+	{ name: "Porte d'Ar Mor", coordinates: [47.2375, -1.5958] },
+	{ name: 'Porte de Chézine', coordinates: [47.25, -1.5792] },
+	{ name: 'Porte de Sautron', coordinates: [47.2583, -1.5667] },
+	{ name: "Porte d'Orvault", coordinates: [47.2667, -1.55] },
+	{ name: 'Porte de Rennes', coordinates: [47.2833, -1.5417] },
+	{ name: 'Porte de Gesvres', coordinates: [47.3, -1.5333] },
+	{ name: 'Porte de La Chapelle', coordinates: [47.3083, -1.525] },
+	{ name: 'Porte de la Beaujoire', coordinates: [47.3167, -1.5083] },
+	{ name: 'Porte de Carquefou', coordinates: [47.3333, -1.5] },
+	{ name: 'Porte de Sainte-Luce', coordinates: [47.35, -1.4917] },
+	{ name: "Porte d'Anjou", coordinates: [47.3667, -1.4833] },
+	{ name: 'Porte du Vignoble', coordinates: [47.3833, -1.475] },
+	{ name: 'Porte de Goulaine', coordinates: [47.4, -1.4667] },
+	{ name: 'Porte de Saint-Sébastien', coordinates: [47.4167, -1.4583] },
+	{ name: 'Porte de Vertou', coordinates: [47.4333, -1.45] },
+	{ name: 'Porte des Sorinières', coordinates: [47.45, -1.4417] },
+	{ name: 'Porte de Rezé', coordinates: [47.4667, -1.4333] },
+	{ name: 'Porte de Retz', coordinates: [47.4833, -1.425] },
+	{ name: 'Porte de Grand Lieu', coordinates: [47.5, -1.4167] },
+	{ name: 'Porte de Bouguenais', coordinates: [47.1806, -1.6078] }
 ]
 
 const distanceThreshold = 0.05 // Distance en kilomètres pour détecter l'entrée/sortie d'une porte
@@ -117,7 +138,7 @@ const TrackingScreen: React.FC = () => {
 
 	const validateTrack = () => {
 		if (startPorte && trackPath.length > 1) {
-			const startCoords = portes.find(p => p.name === startPorte)?.coords
+			const startCoords = portes.find(p => p.name === startPorte)?.coordinates
 			const endCoords = trackPath[trackPath.length - 1]
 
 			if (
@@ -195,7 +216,8 @@ const TrackingScreen: React.FC = () => {
 
 				if (!trackStarted) {
 					const porte = portes.find(
-						p => haversineDistance(p.coords, [lat, lng]) < distanceThreshold
+						p =>
+							haversineDistance(p.coordinates, [lat, lng]) < distanceThreshold
 					)
 					if (porte) {
 						setStartPorte(porte.name)
